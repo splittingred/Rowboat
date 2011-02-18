@@ -31,7 +31,6 @@ if (!empty($debug)) $modx->setLogTarget('ECHO');
 
 /* build query */
 $c = $rowboat->newQuery($table);
-$c->setTableAlias('Test');
 if ($columns != '*') {
     $columns = $modx->fromJSON($columns);
     if (!empty($columns)) {
