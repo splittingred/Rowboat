@@ -1,0 +1,5 @@
+Changelog for Rowboat.
+
+Rowboat 1.0.0
+==============
+- Initial release, with sort, limit, where and columns support.
