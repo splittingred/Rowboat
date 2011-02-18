@@ -10,6 +10,7 @@ if (!($rowboat instanceof Rowboat)) return '';
 /* setup default properties */
 $tpl = $modx->getOption('tpl',$scriptProperties,'');
 $table = $modx->sanitizeString($modx->getOption('table',$scriptProperties,''));
+if (empty($table)) return '';
 $columns = $modx->getOption('columns',$scriptProperties,'');
 $where = $modx->getOption('where',$scriptProperties,'');
 $sortBy = $modx->getOption('sortBy',$_REQUEST,$modx->getOption('sortBy',$scriptProperties,''));
