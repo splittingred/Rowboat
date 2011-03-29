@@ -25,6 +25,19 @@
  * @package rowboat
  */
 class Rowboat {
+    /**
+     * @var rbDebug A reference to the rbDebug object
+     */
+    public $debug = null;
+    /**
+     * @var modX A reference to the modX object.
+     */
+    public $modx = null;
+    /**
+     * @var array An array of configuration options
+     */
+    public $config = array();
+
     function __construct(modX &$modx,array $config = array()) {
         $this->modx =& $modx;
 
@@ -50,39 +63,6 @@ class Rowboat {
 
         $this->modx->addPackage('rowboat',$this->config['modelPath']);
         $this->modx->lexicon->load('rowboat:default');
-    }
-
-    /**
-     * Initializes Rowboat into different contexts.
-     *
-     * @access public
-     * @param string $ctx The context to load. Defaults to web.
-     */
-    public function initialize($ctx = 'web') {
-        switch ($ctx) {
-            case 'mgr':
-                if (!$this->modx->loadClass('rowboat.request.RowboatControllerRequest',$this->config['modelPath'],true,true)) {
-                    return 'Could not load controller request handler.';
-                }
-                $this->request = new RowboatControllerRequest($this);
-                return $this->request->handleRequest();
-            break;
-            case 'connector':
-                if (!$this->modx->loadClass('rowboat.request.RowboatConnectorRequest',$this->config['modelPath'],true,true)) {
-                    return 'Could not load connector request handler.';
-                }
-                $this->request = new RowboatConnectorRequest($this);
-                return $this->request->handle();
-            break;
-            default:
-                /* if you wanted to do any generic frontend stuff here.
-                 * For example, if you have a lot of snippets but common code
-                 * in them all at the beginning, you could put it here and just
-                 * call $rowboat->initialize($modx->context->get('key'));
-                 * which would run this.
-                 */
-            break;
-        }
     }
 
     /**
@@ -132,11 +112,27 @@ class Rowboat {
         return $chunk;
     }
 
+    /**
+     * Load a new rbQuery object
+     *
+     * @param string $table The table to base the query object on
+     * @return rbQuery
+     */
     public function newQuery($table) {
         $c = null;
         if ($this->modx->loadClass('rowboat.rbQuery',$this->config['modelPath'],true,true)) {
             $c = new rbQuery($this->modx,$table);
         }
         return $c;
+    }
+
+    /**
+     * Load Debugging mode
+     */
+    public function loadDebugMode() {
+        if ($this->modx->loadClass('rowboat.rbDebug',$this->config['modelPath'],true,true)) {
+            $this->debug = new rbDebug($this);
+        }
+        return $this->debug;
     }
 }

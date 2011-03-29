@@ -2,4 +2,6 @@ Changelog for Rowboat.
 
 Rowboat 1.0.0
 ==============
+- Added more robust debug ability, with debugging table and sql parameter support
+- Commented all methods
 - Initial release, with sort, limit, where and columns support.

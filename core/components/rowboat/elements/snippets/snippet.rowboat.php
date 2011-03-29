@@ -27,7 +27,10 @@ $debug = $modx->getOption('debug',$scriptProperties,false);
 
 $total = 0;
 $results = array();
-if (!empty($debug)) $modx->setLogTarget('ECHO');
+
+if (!empty($debug)) {
+    $rowboat->loadDebugMode();
+}
 
 /* build query */
 $c = $rowboat->newQuery($table);
@@ -53,7 +56,9 @@ if (intval($limit) > 0) {
 }
 $sql = $c->toSql();
 
-if (!empty($debug)) echo $sql;
+if (!empty($debug)) {
+    $rowboat->debug->setQuery($c);
+}
 
 /* check for cache */
 $cached = false;
@@ -66,6 +71,11 @@ if (!empty($cacheResults)) {
         $results = $cacheArray['results'];
         $total = $cacheArray['total'];
     }
+    $rowboat->debug->addMessage($modx->lexicon('rowboat.debug.cached_results'));
+}
+
+if (!empty($rowboat->debug)) {
+    $rowboat->debug->setTotal($total);
 }
 
 /* run query */
@@ -88,6 +98,10 @@ if (empty($cached)) {
             $modx->cacheManager->set($cacheKey,$cacheArray,$cacheTime);
         }
     }
+}
+
+if (!empty($rowboat->debug)) {
+    $rowboat->debug->setResults($results);
 }
 
 /* iterate across results */
@@ -118,6 +132,9 @@ $modx->setPlaceholders($placeholders,$placeholderPrefix);
 
 /* output */
 $output = implode($outputSeparator,$output);
+if (!empty($rowboat->debug)) {
+    $output .= $rowboat->debug->finish();
+}
 $toPlaceholder = $modx->getOption('toPlaceholder',$scriptProperties,false);
 if (!empty($toPlaceholder)) {
     /* if using a placeholder, output nothing and set output to specified placeholder */

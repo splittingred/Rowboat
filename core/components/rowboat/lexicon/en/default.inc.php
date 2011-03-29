@@ -26,3 +26,12 @@
  * @subpackage lexicon
  */
 $_lang['rowboat'] = 'Rowboat';
+$_lang['rowboat.debug.cached_results'] = 'Results are cached.';
+$_lang['rowboat.debug.header'] = 'Rowboat Debugging Information';
+$_lang['rowboat.debug.messages'] = 'Messages';
+$_lang['rowboat.debug.params'] = 'Parameters';
+$_lang['rowboat.debug.pdo_query'] = 'PDO Statement';
+$_lang['rowboat.debug.query'] = 'SQL Query';
+$_lang['rowboat.debug.results'] = 'Results';
+$_lang['rowboat.debug.table'] = 'Table';
+$_lang['rowboat.debug.total'] = 'Total';

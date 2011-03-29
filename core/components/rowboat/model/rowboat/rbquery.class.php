@@ -79,13 +79,27 @@ class rbQuery {
         ),$config);
     }
 
+    /**
+     * Set the SQL table to pull data from
+     * 
+     * @param string $table The table to pull from
+     */
     public function setTable($table) {
         $this->_table = $table;
     }
+
+    /**
+     * Set the table alias for the query
+     * 
+     * @param string $tableAlias A valid table alias
+     */
     public function setTableAlias($tableAlias) {
         $this->_tableAlias = $tableAlias;
     }
 
+    /**
+     * Prepare the query for execution
+     */
     public function prepare() {
         if (!empty($this->_columns)) {
             $cs = array();
@@ -120,8 +134,13 @@ class rbQuery {
         $this->_prepared = true;
     }
 
+    /**
+     * Build and append a WHERE statement to the query
+     * 
+     * @param string $sql The current sql statement to append the WHERE statement to
+     * @return string The SQL for the WHERE statement
+     */
     protected function _buildWhere($sql) {
-        //var_dump($this->_where);
         $tw = array();
         if (!empty($this->_where)) {
             $sql .= ' WHERE';
@@ -160,6 +179,13 @@ class rbQuery {
         return $sql;
     }
 
+    /**
+     * Add a parameter to the statement
+     * 
+     * @param string $k The column in the table
+     * @param string $v The value to set to the parameter
+     * @return string The key that was set
+     */
     public function addParam($k,$v) {
         if (!empty($v)) {
             $kz = explode('.',$k);
@@ -174,6 +200,11 @@ class rbQuery {
         return $k;
     }
 
+    /**
+     * Execute a prepared statement
+     * 
+     * @return bool True if successful
+     */
     public function execute() {
         if (!$this->_prepared) {
             $this->prepare();
@@ -188,18 +219,56 @@ class rbQuery {
         return $this->success();
     }
 
+    /**
+     * Close the cursor of this query
+     */
     public function close() {
         return $this->stmt->closeCursor();
     }
+
+    /**
+     * Determine if the statement was a successful query
+     * 
+     * @return bool True if successful
+     */
     public function success() {
         return $this->stmt && $this->stmt instanceof PDOStatement;
     }
 
+    /**
+     * Return an array of parameters set to this query
+     * 
+     * @return array An associative array of parameters assigned to this query
+     */
+    public function getParams() {
+        return $this->_params;
+    }
 
+    /**
+     * Return the table name
+     *
+     * @return string The SQL database table name
+     */
+    public function getTable() {
+        return $this->_table;
+    }
+
+    /**
+     * Prefix a field with the table alias
+     *
+     * @param string $field A column to prefix with
+     * @return string The prefixed field
+     */
     public function prefixWithTableAlias($field) {
         return !empty($this->_tableAlias) ? $this->escape($this->_tableAlias).rbQuery::SEPARATOR.$field : $field;
     }
 
+    /**
+     * Escape a field name or value
+     *
+     * @param string $v The value or field to escape
+     * @return array|string The properly escaped value
+     */
     public function escape($v) {
         $escape = !preg_match('/\bAS\b/i', $v) && !preg_match('/\(/', $v);
         if (!$escape) return $v;
@@ -218,6 +287,11 @@ class rbQuery {
         return $v;
     }
 
+    /**
+     * Add a WHERE statement to the query object
+     * 
+     * @param string|array $criteria The criteria to add, either in string or array format
+     */
     public function where($criteria) {
         if (is_array($criteria)) {
             foreach ($criteria as $col => $v) {
@@ -228,14 +302,30 @@ class rbQuery {
         }
     }
 
+    /**
+     * Add a condition to the query
+     *
+     * @param string $criteria
+     */
     protected function condition($criteria) {
         $this->_where[] = $criteria;
     }
 
+    /**
+     * Add a SORT BY statement to the query
+     *
+     * @param string $col The column or phrase to sort by
+     * @param string $dir The direction to sort by
+     */
     public function sortby($col,$dir = '') {
         $this->_sort[]= array ('column' => $col, 'direction' => $dir);
     }
 
+    /**
+     * An array or string of columns to select for this query
+     *
+     * @param string $columns The columns to select
+     */
     public function select($columns = '*') {
         if (!is_array($columns)) {
             $columns= trim($columns);
@@ -251,10 +341,21 @@ class rbQuery {
         }
     }
 
+    /**
+     * Set the columns for this query. Use ->select instead.
+     *
+     * @param array $columns An array of columns.
+     */
     public function setColumns(array $columns = array()) {
         $this->_columns = $columns;
     }
 
+    /**
+     * Add a limit statement to the query
+     *
+     * @param int $limit The number of results to limit
+     * @param int $offset The starting index of the limited results
+     */
     public function limit($limit = 0,$offset = 0) {
         $limit = intval($limit);
         if ($limit > 0) {
@@ -266,6 +367,12 @@ class rbQuery {
         }
     }
 
+    /**
+     * Run the PDO fetch command to get the results of the prepared statement
+     * 
+     * @param int $fetchStyle The style by which to fetch the results
+     * @return array An array of returned results
+     */
     public function getResults($fetchStyle = PDO::FETCH_ASSOC) {
         $results = array();
         while ($row = $this->stmt->fetch($fetchStyle)) {
@@ -274,14 +381,33 @@ class rbQuery {
         return $results;
     }
 
-
-    public function toSql() {
+    /**
+     * Return the formatted, prepared SQL query statement in text format
+     *
+     * @return string The string SQL query
+     */
+    public function toSql($replaceParams = true) {
         if (!$this->_prepared) {
             $this->prepare();
         }
-        return $this->_sql;
+        $sql = $this->_sql;
+        if ($replaceParams) {
+            foreach ($this->_params as $key => $value) {
+                $v = $value;
+                if (!is_int($v)) {
+                    $v = '"'.$v.'"';
+                }
+                $sql = str_replace(':'.$key,$v,$sql);
+            }
+        }
+        return $sql;
     }
 
+    /**
+     * Get a count of results for this statement
+     *
+     * @return int The number of results for the query
+     */
     public function count() {
         $total = 0;
         $this->setColumns(array('COUNT(*) '.$this->modx->escape('ct')));
