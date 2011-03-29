@@ -71,7 +71,9 @@ if (!empty($cacheResults)) {
         $results = $cacheArray['results'];
         $total = $cacheArray['total'];
     }
-    $rowboat->debug->addMessage($modx->lexicon('rowboat.debug.cached_results'));
+    if (!empty($debug)) {
+        $rowboat->debug->addMessage($modx->lexicon('rowboat.debug.cached_results'));
+    }
 }
 
 if (!empty($rowboat->debug)) {
@@ -111,6 +113,7 @@ if (is_array($results)) {
     $idx = 0;
     foreach ($results as $row) {
         $row['_idx'] = $idx;
+        $row['_alt'] = $idx % 2;
         if ($idx == 0) $row['_first'] = true;
         if ($idx == $ct-1) $row['_last'] = true;
         
