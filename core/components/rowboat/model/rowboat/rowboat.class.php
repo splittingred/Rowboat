@@ -120,8 +120,9 @@ class Rowboat {
      */
     public function newQuery($table) {
         $c = null;
-        if ($this->modx->loadClass('rowboat.rbQuery',$this->config['modelPath'],true,true)) {
-            $c = new rbQuery($this->modx,$table);
+        $driverClass = 'rbQuery_'.$this->modx->config['dbtype'];
+        if ($this->modx->loadClass('rowboat.drivers.'.$driverClass,$this->config['modelPath'],true,true)) {
+            $c = new $driverClass($this->modx,$table);
         }
         return $c;
     }

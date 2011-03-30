@@ -34,6 +34,9 @@ if (!empty($debug)) {
 
 /* build query */
 $c = $rowboat->newQuery($table);
+if (empty($c)) {
+    return $modx->lexicon('rowboat.no_driver',array('dbtype' => $modx->config['dbtype']));
+}
 if ($columns != '*') {
     $columns = $modx->fromJSON($columns);
     if (!empty($columns)) {

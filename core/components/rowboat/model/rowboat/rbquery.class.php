@@ -20,9 +20,11 @@
  * @package rowboat
  */
 /**
+ * Abstract class for Query generation for Rowboat. Must be extended per driver and never loaded directly.
+ * 
  * @package rowboat
  */
-class rbQuery {
+abstract class rbQuery {
     const SEPARATOR = '.';
 
     protected $_prepared = false;
@@ -35,6 +37,7 @@ class rbQuery {
     protected $_sort = array();
     protected $_where = array();
     protected $_params = array();
+    protected $_preparedSql = '';
     
     protected $_operators= array (
         '=',
@@ -99,85 +102,31 @@ class rbQuery {
 
     /**
      * Prepare the query for execution
+     * @return string The prepared SQL string
+     * @abstract
      */
-    public function prepare() {
-        if (!empty($this->_columns)) {
-            $cs = array();
-            foreach ($this->_columns as $column => $alias) {
-                if (empty($alias)) $alias = $column;
-                $cs[] = $alias != $column && !is_integer($column) ? $this->escape($column).' AS '.$this->escape($alias) : $this->escape($alias);
-            }
-            $columns = implode(',',$cs);
-        } else { $columns = '*'; }
-
-        $sql = 'SELECT '.$columns.' FROM '.$this->escape($this->_table);
-        if (!empty($this->_tableAlias)) $sql .= ' '.$this->escape($this->_tableAlias);
-
-        $sql = $this->_buildWhere($sql);
-
-        if (!empty($this->_sort)) {
-            $sort= reset($this->_sort);
-            $sql .= ' ORDER BY ';
-            $sql .= $this->escape($sort['column']);
-            if ($sort['direction']) $sql .= ' ' . $sort['direction'];
-            while ($sortby= next($this->_sort)) {
-                $sql.= ', ';
-                $sql.= $this->escape($sortby['column']);
-                if ($sortby['direction']) $sql.= ' ' . $sortby['direction'];
-            }
-        }
-        if (!empty($this->_limit)) {
-            $sql .= ' LIMIT '.(!empty($this->_offset) ? $this->_offset.',' : '').$this->_limit;
-        }
-        
-        $this->_sql = trim($sql);
-        $this->_prepared = true;
-    }
+    abstract public function prepare();
 
     /**
-     * Build and append a WHERE statement to the query
-     * 
-     * @param string $sql The current sql statement to append the WHERE statement to
-     * @return string The SQL for the WHERE statement
+     * Prepare the SELECT statement for the query
+     * @abstract
      */
-    protected function _buildWhere($sql) {
-        $tw = array();
-        if (!empty($this->_where)) {
-            $sql .= ' WHERE';
-            foreach ($this->_where as $condition) {
-                if (is_array($condition)) {
-                    foreach ($condition as $k => $v) {
-                        $operand = empty($tw) ? '' : 'AND';
-                        $operator = '=';
-                        if ($k === 0) {
-                            $tw[] = $operand.' '.$v;
-                        } else if (is_string($k)) {
-                            $op = explode(':',$k);
-                            if (count($op) == 1) {
-                                $field = $op[0];
-
-                            } else if (in_array($op[0],$this->_conditionals)) {
-                                $operand = 'OR';
-                                $field = $op[1];
-                                if (!empty($op[2])) {
-                                    $operator = $op[2];
-                                }
-                            } else {
-                                if (!empty($op[1])) {
-                                    $operator = $op[1];
-                                }
-                                $field = $op[0];
-                            }
-                            $tw[] = $operand.' '.$this->escape($field).' '.$operator.' '.$this->addParam($field,$v);
-                        }
-                    }
-                }
-            }
-        }
-        $sql .= ' '.ltrim(implode(" ",$tw),' AND ');
-
-        return $sql;
-    }
+    abstract protected function prepareSelect();
+    /**
+     * Prepare the SORT statement for the query
+     * @abstract
+     */
+    abstract protected function prepareSort();
+    /**
+     * Prepare the LIMIT statement for the query
+     * @abstract
+     */
+    abstract protected function prepareLimit();
+    /**
+     * Build and append a WHERE statement to the query
+     * @abstract
+     */
+    abstract protected function prepareWhere();
 
     /**
      * Add a parameter to the statement
@@ -212,7 +161,7 @@ class rbQuery {
         $this->stmt = $this->modx->prepare($this->_sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
         if (!empty($this->_params) && is_array($this->_params)) {
             foreach ($this->_params as $k => $v) {
-                $this->stmt->bindParam(':'.$k,$v);
+                $this->stmt->bindValue(':'.$k,$v);
             }
         }
         $this->stmt->execute();
@@ -273,8 +222,8 @@ class rbQuery {
         $escape = !preg_match('/\bAS\b/i', $v) && !preg_match('/\(/', $v);
         if (!$escape) return $v;
 
-        if (strpos($v,'.') !== false) {
-            $parts = explode('.',$v);
+        if (strpos($v,rbQuery::SEPARATOR) !== false) {
+            $parts = explode(rbQuery::SEPARATOR,$v);
             $v = array();
             foreach ($parts as $part) {
                 $v[] = $this->modx->escape($part);
@@ -390,7 +339,7 @@ class rbQuery {
         if (!$this->_prepared) {
             $this->prepare();
         }
-        $sql = $this->_sql;
+        $sql = implode("\n ",$this->_preparedSql);
         if ($replaceParams) {
             foreach ($this->_params as $key => $value) {
                 $v = $value;
@@ -406,18 +355,8 @@ class rbQuery {
     /**
      * Get a count of results for this statement
      *
+     * @abstract
      * @return int The number of results for the query
      */
-    public function count() {
-        $total = 0;
-        $this->setColumns(array('COUNT(*) '.$this->modx->escape('ct')));
-        if ($this->execute()) {
-            $count = $this->getResults();
-            if (!empty($count) && !empty($count[0]['ct'])) {
-                $total = intval($count[0]['ct']);
-            }
-            $this->close();
-        }
-        return $total;
-    }
+    abstract public function count();
 }

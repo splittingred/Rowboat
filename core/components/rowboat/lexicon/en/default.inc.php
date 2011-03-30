@@ -35,3 +35,4 @@ $_lang['rowboat.debug.query'] = 'SQL Query';
 $_lang['rowboat.debug.results'] = 'Results';
 $_lang['rowboat.debug.table'] = 'Table';
 $_lang['rowboat.debug.total'] = 'Total';
+$_lang['rowboat.no_driver'] = 'There is not currently a DB driver for your database type: [[+dbtype]]';

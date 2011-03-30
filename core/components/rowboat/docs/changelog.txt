@@ -1,5 +1,10 @@
 Changelog for Rowboat.
 
+Rowboat 1.0.1
+==============
+- Refactoring to allow for other database drivers to be developed
+- Fix issue with bindParam/Value
+
 Rowboat 1.0.0
 ==============
 - Added more robust debug ability, with debugging table and sql parameter support

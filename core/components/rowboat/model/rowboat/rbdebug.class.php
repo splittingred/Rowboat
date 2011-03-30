@@ -108,8 +108,8 @@ class rbDebug {
 
         if (!empty($this->query)) {
             $output[] = $this->renderRow($this->modx->lexicon('rowboat.debug.table'),$this->query->getTable());
-            $output[] = $this->renderRow($this->modx->lexicon('rowboat.debug.query'),$this->query->toSql());
-            $output[] = $this->renderRow($this->modx->lexicon('rowboat.debug.pdo_query'),$this->query->toSql(false));
+            $output[] = $this->renderRow($this->modx->lexicon('rowboat.debug.query'),nl2br($this->query->toSql()));
+            $output[] = $this->renderRow($this->modx->lexicon('rowboat.debug.pdo_query'),nl2br($this->query->toSql(false)));
             $output[] = $this->renderRow($this->modx->lexicon('rowboat.debug.params'),'<pre>'.var_export($this->query->getParams(),true).'</pre>');
             $output[] = $this->renderRow($this->modx->lexicon('rowboat.debug.total'),$this->total);
         }
