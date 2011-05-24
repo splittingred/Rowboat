@@ -3,6 +3,7 @@ Changelog for Rowboat.
 Rowboat 1.1.0
 ==============
 - Add returnFormat param for returning data in JSON format
+- [#4283] Adjust limit property to default to 10
 
 Rowboat 1.0.1
 ==============
