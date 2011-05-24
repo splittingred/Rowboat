@@ -1,5 +1,9 @@
 Changelog for Rowboat.
 
+Rowboat 1.1.0
+==============
+- Add returnFormat param for returning data in JSON format
+
 Rowboat 1.0.1
 ==============
 - Refactoring to allow for other database drivers to be developed

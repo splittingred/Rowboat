@@ -79,7 +79,7 @@ $properties = array(
         'desc' => 'prop_rowboat.limit_desc',
         'type' => 'textfield',
         'options' => '',
-        'value' => 5,
+        'value' => 10,
         'lexicon' => 'rowboat:properties',
     ),
     array(
@@ -111,6 +111,17 @@ $properties = array(
         'desc' => 'prop_rowboat.outputseparator_desc',
         'type' => 'textfield',
         'options' => '',
+        'value' => '',
+        'lexicon' => 'rowboat:properties',
+    ),
+    array(
+        'name' => 'returnFormat',
+        'desc' => 'prop_rowboat.returnformat_desc',
+        'type' => 'textfield',
+        'options' => array(
+            array('text' => 'prop_rowboat.normal','value' => ''),
+            array('text' => 'JSON','value' => 'json'),
+        ),
         'value' => '',
         'lexicon' => 'rowboat:properties',
     ),
