@@ -63,7 +63,7 @@ $properties = array(
         'desc' => 'prop_rowboat.sortby_desc',
         'type' => 'textfield',
         'options' => '',
-        'value' => 'name',
+        'value' => '',
         'lexicon' => 'rowboat:properties',
     ),
     array(
