@@ -1,7 +1,31 @@
 <?php
 /**
+ * Rowboat
+ *
+ * Copyright 2011 by Shaun McCormick <shaun+rowboat@modx.com>
+ *
+ * Rowboat is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option) any later
+ * version.
+ *
+ * Rowboat is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Rowboat; if not, write to the Free Software Foundation, Inc., 59 Temple
+ * Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * @package rowboat
+ */
+/**
  * The base Rowboat snippet.
  *
+ * @var modX $modx
+ * @var Rowboat $rowboat
+ * @var array $scriptProperties
+ * 
  * @package rowboat
  */
 $rowboat = $modx->getService('rowboat','Rowboat',$modx->getOption('rowboat.core_path',null,$modx->getOption('core_path').'components/rowboat/').'model/rowboat/',$scriptProperties);
@@ -14,7 +38,7 @@ if (empty($table)) return '';
 $columns = $modx->getOption('columns',$scriptProperties,'');
 $where = $modx->getOption('where',$scriptProperties,'');
 $sortBy = $modx->getOption('sortBy',$_REQUEST,$modx->getOption('sortBy',$scriptProperties,''));
-$sortBy = $modx->sanitizeString($sortBy);
+$sortBy = preg_replace("/[^A-Za-z0-9_,:\-\.\/]/",'',str_replace(array('/',"'",'"','(',')',';','>','<'),'',strip_tags($sortBy,'')));
 $sortDir = $modx->getOption('sortDir',$_REQUEST,$modx->getOption('sortDir',$scriptProperties,'ASC'));
 $sortDir = $modx->sanitizeString($sortDir);
 $limit = $modx->getOption('limit',$_REQUEST,$modx->getOption('limit',$scriptProperties,10));
@@ -52,9 +76,17 @@ if (!empty($where)) {
 }
 
 if (!empty($sortBy)) {
-    $c->sortby($sortBy,$sortDir);
+    $sortBy = explode(',',$sortBy);
+    foreach ($sortBy as $sortField) {
+        $sortMix = explode(':',$sortField);
+        $sortDirection = !empty($sortMix[1]) ? $sortMix[1] : $sortDir;
+        $sortField = $sortMix[0];
+        $c->sortby($sortField,$sortDirection);
+    }
 }
+$cc = null;
 if (intval($limit) > 0) {
+    /** @var rbQuery $cc */
     $cc = clone $c;
     $c->limit($limit,$offset);
 }

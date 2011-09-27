@@ -2,6 +2,7 @@ Changelog for Rowboat.
 
 Rowboat 1.1.0
 ==============
+- [#5459] Allow multiple sort fields in &sortBy=`field1,field2:DESC,field3` format
 - Add returnFormat param for returning data in JSON format
 - [#4283] Adjust limit property to default to 10
 
