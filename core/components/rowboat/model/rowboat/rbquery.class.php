@@ -140,7 +140,7 @@ abstract class rbQuery {
             $kz = explode('.',$k);
             $k = !empty($kz[1]) ? $kz[1] : $kz[0];
             if (array_key_exists($k,$this->_params)) {
-                $k = $k.uniqid($k);
+                $k = $k.uniqid();
             }
 
             $this->_params[$k] = $v;
